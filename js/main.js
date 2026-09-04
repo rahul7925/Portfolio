@@ -28,10 +28,8 @@
 	var fullHeight = function() {
 
 		if ( !isMobile.any() ) {
-			$('.js-fullheight').css('height', $(window).height());
-			$(window).resize(function(){
-				$('.js-fullheight').css('height', $(window).height());
-			});
+			
+			
 		}
 
 	};
@@ -150,9 +148,12 @@
 				navbar = $('#navbar');
 
 				if ( $('[data-section="' + section + '"]').length ) {
-			    	$('html, body').animate({
-			        	scrollTop: $('[data-section="' + section + '"]').offset().top - 55
-			    	}, 500);
+					var targetOffset = $('[data-section="' + section + '"]').offset().top - 55;
+					if ('scrollBehavior' in document.documentElement.style) {
+						window.scrollTo({ top: targetOffset, behavior: 'smooth' });
+					} else {
+						$('html, body').animate({ scrollTop: targetOffset }, 500);
+					}
 			   }
 
 		    if ( navbar.is(':visible')) {
@@ -214,78 +215,52 @@
 			slideshowSpeed: 5000,
 			directionNav: true,
 			start: function(){
-				setTimeout(function(){
-					$('.slider-text').removeClass('animated fadeInUp');
-					$('.flex-active-slide').find('.slider-text').addClass('animated fadeInUp');
-				}, 500);
+				setTimeout(function(){ $('.slider-text').removeClass('animated fadeInUp'); $('.flex-active-slide').find('.slider-text').addClass('animated fadeInUp'); }, 100);
 			},
 			before: function(){
-				setTimeout(function(){
-					$('.slider-text').removeClass('animated fadeInUp');
-					$('.flex-active-slide').find('.slider-text').addClass('animated fadeInUp');
-				}, 500);
+				setTimeout(function(){ $('.slider-text').removeClass('animated fadeInUp'); $('.flex-active-slide').find('.slider-text').addClass('animated fadeInUp'); }, 100);
 			}
 
 	  	});
 
 	};
 
-	var stickyFunction = function() {
-
-		var h = $('.image-content').outerHeight();
-
-		if ($(window).width() <= 992 ) {
-			$("#sticky_item").trigger("sticky_kit:detach");
-		} else {
-			$('.sticky-parent').removeClass('stick-detach');
-			$("#sticky_item").trigger("sticky_kit:detach");
-			$("#sticky_item").trigger("sticky_kit:unstick");
+	
+	
+		// Lazy load and play videos on scroll
+	var initVideoObserver = function() {
+		if ('IntersectionObserver' in window) {
+			var videoObserver = new IntersectionObserver(function(entries, observer) {
+				entries.forEach(function(entry) {
+					if (entry.isIntersecting) {
+						var video = entry.target;
+						if (video.hasAttribute('data-src')) {
+							video.src = video.getAttribute('data-src');
+							video.removeAttribute('data-src');
+						}
+						video.play().catch(function(){});
+					} else {
+						entry.target.pause();
+					}
+				});
+			}, { rootMargin: "0px 0px 200px 0px" });
+			
+			$('.lazy-video').each(function() {
+				videoObserver.observe(this);
+			});
 		}
-
-		$(window).resize(function(){
-			var h = $('.image-content').outerHeight();
-			$('.sticky-parent').css('height', h);
-
-
-			if ($(window).width() <= 992 ) {
-				$("#sticky_item").trigger("sticky_kit:detach");
-			} else {
-				$('.sticky-parent').removeClass('stick-detach');
-				$("#sticky_item").trigger("sticky_kit:detach");
-				$("#sticky_item").trigger("sticky_kit:unstick");
-
-				$("#sticky_item").stick_in_parent();
-			}
-			
-
-			
-
-		});
-
-		$('.sticky-parent').css('height', h);
-
-		$("#sticky_item").stick_in_parent();
-
 	};
-
-	var owlCrouselFeatureSlide = function() {
-		$('.owl-carousel').owlCarousel({
-			animateOut: 'fadeOut',
-		   animateIn: 'fadeIn',
-		   autoplay: true,
-		   loop:true,
-		   margin:0,
-		   nav:true,
-		   dots: false,
-		   autoHeight: true,
-		   items: 1,
-		   navText: [
-		      "<i class='icon-arrow-left3 owl-direction'></i>",
-		      "<i class='icon-arrow-right3 owl-direction'></i>"
-	     	]
-		})
+		// Conditional Vanilla Tilt
+	var initTilt = function() {
+		if (window.innerWidth > 768 && typeof VanillaTilt !== 'undefined') {
+			VanillaTilt.init(document.querySelectorAll(".cap-card, .modern-contact-card"), {
+				max: 15,
+				speed: 400,
+				glare: true,
+				"max-glare": 0.2
+			});
+		}
 	};
-
 	// Document on load.
 	$(function(){
 		fullHeight();
@@ -301,10 +276,18 @@
 
 
 		mobileMenuOutsideClick();
+		initVideoObserver();
+		initTilt();
 		sliderMain();
-		stickyFunction();
-		owlCrouselFeatureSlide();
 	});
 
 
 }());
+
+
+
+
+
+
+
+
