@@ -83,7 +83,7 @@
 							}
 
 							el.removeClass('item-animate');
-						},  k * 200, 'easeInOutExpo' );
+						},  Math.min(k * 50, 400) );
 					});
 					
 				}, 100);
@@ -212,16 +212,33 @@
 		
 	  	$('#colorlib-hero .flexslider').flexslider({
 			animation: "fade",
+			slideshow: true,
 			slideshowSpeed: 5000,
-			directionNav: true,
+			animationSpeed: 800,
+			directionNav: false,
+			controlNav: true,
+			touch: true,
+			pauseOnHover: false,
+			pauseOnAction: false,
 			start: function(){
 				setTimeout(function(){ $('.slider-text').removeClass('animated fadeInUp'); $('.flex-active-slide').find('.slider-text').addClass('animated fadeInUp'); }, 100);
 			},
 			before: function(){
 				setTimeout(function(){ $('.slider-text').removeClass('animated fadeInUp'); $('.flex-active-slide').find('.slider-text').addClass('animated fadeInUp'); }, 100);
 			}
-
 	  	});
+
+		// Optional dot click/touch navigation without interrupting loop
+		$(document).on('click touchend', '#colorlib-hero .flex-control-nav li a, #colorlib-hero .flex-control-nav li', function(e) {
+			e.preventDefault();
+			var $target = $(this).is('a') ? $(this) : $(this).find('a');
+			var targetIndex = $target.parent().index();
+			var slider = $('#colorlib-hero .flexslider').data('flexslider');
+			if (slider && targetIndex !== slider.currentSlide) {
+				slider.flexAnimate(targetIndex, false);
+				slider.play();
+			}
+		});
 
 	};
 
@@ -250,14 +267,17 @@
 			});
 		}
 	};
-		// Conditional Vanilla Tilt
+		// Dynamic Motion Tilt Cards (Scoped strictly to Skills section)
 	var initTilt = function() {
-		if (window.innerWidth > 768 && typeof VanillaTilt !== 'undefined') {
-			VanillaTilt.init(document.querySelectorAll(".cap-card, .modern-contact-card"), {
-				max: 15,
-				speed: 400,
+		if (typeof VanillaTilt !== 'undefined') {
+			VanillaTilt.init(document.querySelectorAll(".modern-skill-card"), {
+				max: 14,
+				speed: 500,
+				perspective: 1000,
+				scale: 1.04,
 				glare: true,
-				"max-glare": 0.2
+				"max-glare": 0.22,
+				gyroscope: true
 			});
 		}
 	};
